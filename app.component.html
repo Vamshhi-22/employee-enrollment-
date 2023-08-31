@@ -1,0 +1,253 @@
+<div class="container mt-4">
+  <p-table [value]="employeesDetails" [paginator]="true" [rows]="5">
+    <br />
+    <ng-template pTemplate="header">
+      <i
+        class="fa-regular fa-square-plus fa-2xl add-box-icon"
+        (click)="showAddDialog()"
+      ></i>
+      <br />
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>mobile Number</th>
+        <th class="action-adjust">Actions</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-person>
+      <tr>
+        <td>{{ person.id }}</td>
+        <td>{{ person.name | uppercase }}</td>
+        <td>{{ person.mobileNumber | titlecase }}</td>
+        <td>
+          <i
+            class="fa-solid fa-street-view fa-2xl"
+            (click)="onView(person)"
+          ></i>
+
+          <i
+            class="fa-solid fa-pen-to-square fa-2xl view-set"
+            (click)="updateView(person)"
+          ></i>
+          <i
+            class="fa-solid fa-user-slash fa-2xl view-set-delete"
+            (click)="deleteEmployee(person)"
+          ></i>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+<p-dialog
+  header="Details for {{ selectedPerson?.name | uppercase }}"
+  [(visible)]="displayDetailsDialog"
+  [modal]="true"
+  [responsive]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '50%', 'max-height': '110vh', overflow: 'auto' }"
+  [contentStyle]="{
+    'background-color': '#fff',
+    padding: '20px',
+    overflow: 'auto'
+  }"
+  styleClass="custom-dialog"
+>
+  <div class="modal-body body-custom">
+    <div class="label-value-grid">
+      <div class="label-value-pair">
+        <div class="label-large">ID:</div>
+        <div class="value-large">{{ selectedPerson?.id }}</div>
+      </div>
+
+      <div class="label-value-pair">
+        <div class="label-large">Name:</div>
+        <div class="value-large">{{ selectedPerson?.name | uppercase }}</div>
+      </div>
+
+      <div class="label-value-pair">
+        <div class="label-large">Email ID:</div>
+        <div class="value-large">{{ selectedPerson?.emailId }}</div>
+      </div>
+
+      <div class="label-value-pair">
+        <div class="label-large">Phone Number:</div>
+        <div class="value-large">{{ selectedPerson?.mobileNumber }}</div>
+      </div>
+
+      <div class="label-value-pair">
+        <div class="label-large">Salary:</div>
+        <div class="value-large">{{ selectedPerson?.salary }}</div>
+      </div>
+
+      <div class="label-value-pair">
+        <div class="label-large">Department ID:</div>
+        <div class="value-large">{{ selectedPerson?.departmentId }}</div>
+      </div>
+
+      <div class="label-value-pair">
+        <div class="label-large">City:</div>
+        <div class="value-large">{{ selectedPerson?.city }}</div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-danger" (click)="closeDetails()">
+        Close
+      </button>
+    </div>
+  </div>
+</p-dialog>
+
+<p-dialog
+  [(visible)]="isAddUserModalOpen"
+  [style]="{ width: '40%', 'max-height': '110vh', overflow: 'auto' }"
+  [contentStyle]="{
+    'background-color': '#fff',
+    padding: '20px',
+    overflow: 'auto'
+  }"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [blockScroll]="false"
+>
+  <div><p class="header" *ngIf="formMode === 'ADD'">ADD EMPLOYEE HERE</p></div>
+  <div><p class="header" *ngIf="formMode === 'update'">UPDATE EMPLOYEE</p></div>
+  <div><p class="header" *ngIf="formMode === 'delete'">DELETE EMPLOYEE</p></div>
+  <form>
+    <div class="form-group">
+      <label for="idInput" class="label-large">ID:</label>
+      <input
+        type="text"
+        class="form-control col-9"
+        id="idInput"
+        [(ngModel)]="newEmployee.id"
+        name="id"
+        #idInput="ngModel"
+        [disabled]="formMode === 'update'"
+      />
+    </div>
+    <div class="form-group">
+      <label for="nameInput" class="label-large">Name:</label>
+      <input
+        type="text"
+        class="form-control col-9"
+        id="nameInput"
+        [(ngModel)]="newEmployee.name"
+        name="name"
+        #nameInput="ngModel"
+        [ngClass]="{
+          'is-invalid':
+            nameInput.invalid && (nameInput.dirty || nameInput.touched)
+        }"
+      />
+      <div
+        *ngIf="nameInput.invalid && (nameInput.dirty || nameInput.touched)"
+        class="invalid-feedback"
+      >
+        Name is required.
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="emailInput" class="label-large">Email ID:</label>
+      <input
+        type="email"
+        class="form-control col-9"
+        id="emailInput"
+        [(ngModel)]="newEmployee.emailId"
+        name="emailId"
+        #emailInputNgModel="ngModel"
+        required
+      />
+      <div
+        *ngIf="
+          emailInputNgModel.invalid &&
+          (emailInputNgModel.dirty || emailInputNgModel.touched)
+        "
+        class="invalid-feedback"
+      >
+        Invalid email.
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="mobileInput" class="label-large">Phone Number:</label>
+      <input
+        type="tel"
+        class="form-control col-9"
+        id="mobileInput"
+        [(ngModel)]="newEmployee.mobileNumber"
+        name="mobileNumber"
+      />
+    </div>
+    <div class="form-group">
+      <label for="salaryInput" class="label-large">Salary:</label>
+      <input
+        type="number"
+        class="form-control col-9"
+        id="salaryInput"
+        [(ngModel)]="newEmployee.salary"
+        name="salary"
+      />
+    </div>
+    <div class="form-group">
+      <label for="departmentInput" class="label-large">Department ID:</label>
+      <input
+        type="text"
+        class="form-control col-9"
+        id="departmentInput"
+        [(ngModel)]="newEmployee.departmentId"
+        name="departmentId"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="cityInput" class="label-large">City:</label>
+      <input
+        type="text"
+        class="form-control col-9"
+        id="cityInput"
+        [(ngModel)]="newEmployee.city"
+        name="city"
+      />
+    </div>
+
+    <div class="p-field">
+      <button
+        type="button"
+        pButton
+        label="Submit"
+        class="p-button-primary"
+        *ngIf="formMode === 'ADD'"
+        (click)="submitAddUser()"
+      ></button>
+      <button
+        type="button"
+        pButton
+        label="Update"
+        class="p-button-primary"
+        *ngIf="formMode === 'update'"
+        (click)="updateUser()"
+      ></button
+      >&nbsp;
+      <button
+        type="button"
+        pButton
+        label="Delete"
+        class="p-button-primary"
+        *ngIf="formMode === 'delete'"
+        (click)="deleteUser(newEmployee.id)"
+      ></button>
+      &nbsp;
+      <button
+        type="button"
+        pButton
+        label="Cancel"
+        class="p-button-secondary"
+        (click)="closeAddUserModal()"
+      ></button>
+    </div>
+  </form>
+</p-dialog>
